@@ -1,5 +1,6 @@
-train  = voc_train.txt
-valid  = 2007_test.txt
+train  = /dataset/Pascal/voc_train.txt
+valid  = /dataset/Pascal/2007_test.txt
 names = data/voc.names
 backup = backup
-gpus  = 0,1,2,3
+gpus  = 0
+num_workers = 8

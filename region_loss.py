@@ -10,7 +10,7 @@ def build_targets(pred_boxes, target, anchors, num_anchors, num_classes, nH, nW,
     nB = target.size(0)
     nA = num_anchors
     nC = num_classes
-    anchor_step = len(anchors)/num_anchors
+    anchor_step = int(len(anchors)/num_anchors)
     conf_mask  = torch.ones(nB, nA, nH, nW) * noobject_scale
     coord_mask = torch.zeros(nB, nA, nH, nW)
     cls_mask   = torch.zeros(nB, nA, nH, nW)
@@ -23,10 +23,10 @@ def build_targets(pred_boxes, target, anchors, num_anchors, num_classes, nH, nW,
 
     nAnchors = nA*nH*nW
     nPixels  = nH*nW
-    for b in xrange(nB):
+    for b in range(nB):
         cur_pred_boxes = pred_boxes[b*nAnchors:(b+1)*nAnchors].t()
         cur_ious = torch.zeros(nAnchors)
-        for t in xrange(50):
+        for t in range(50):
             if target[b][t*5+1] == 0:
                 break
             gx = target[b][t*5+1]*nW
@@ -49,8 +49,8 @@ def build_targets(pred_boxes, target, anchors, num_anchors, num_classes, nH, nW,
 
     nGT = 0
     nCorrect = 0
-    for b in xrange(nB):
-        for t in xrange(50):
+    for b in range(nB):
+        for t in range(50):
             if target[b][t*5+1] == 0:
                 break
             nGT = nGT + 1
@@ -64,7 +64,7 @@ def build_targets(pred_boxes, target, anchors, num_anchors, num_classes, nH, nW,
             gw = target[b][t*5+3]*nW
             gh = target[b][t*5+4]*nH
             gt_box = [0, 0, gw, gh]
-            for n in xrange(nA):
+            for n in range(nA):
                 aw = anchors[anchor_step*n]
                 ah = anchors[anchor_step*n+1]
                 anchor_box = [0, 0, aw, ah]
@@ -105,7 +105,7 @@ class RegionLoss(nn.Module):
         self.num_classes = num_classes
         self.anchors = anchors
         self.num_anchors = num_anchors
-        self.anchor_step = len(anchors)/num_anchors
+        self.anchor_step = int(len(anchors)/num_anchors) # updated NED 20180225
         self.coord_scale = 1
         self.noobject_scale = 1
         self.object_scale = 5
@@ -119,8 +119,8 @@ class RegionLoss(nn.Module):
         nB = output.data.size(0)
         nA = self.num_anchors
         nC = self.num_classes
-        nH = output.data.size(2)
-        nW = output.data.size(3)
+        nH = int(output.data.size(2))
+        nW = int(output.data.size(3))
 
         output   = output.view(nB, nA, (5+nC), nH, nW)
         x    = F.sigmoid(output.index_select(2, Variable(torch.cuda.LongTensor([0]))).view(nB, nA, nH, nW))
@@ -180,5 +180,21 @@ class RegionLoss(nn.Module):
             print('     build targets : %f' % (t3 - t2))
             print('       create loss : %f' % (t4 - t3))
             print('             total : %f' % (t4 - t0))
-        print('%d: nGT %d, recall %d, proposals %d, loss: x %f, y %f, w %f, h %f, conf %f, cls %f, total %f' % (self.seen, nGT, nCorrect, nProposals, loss_x.data[0], loss_y.data[0], loss_w.data[0], loss_h.data[0], loss_conf.data[0], loss_cls.data[0], loss.data[0]))
-        return loss
+            print('%d: nGT %d, recall %d, proposals %d, loss: x %f, y %f, w %f, h %f, conf %f, cls %f, total %f' % (self.seen, nGT, nCorrect, nProposals, loss_x.data[0], loss_y.data[0], loss_w.data[0], loss_h.data[0], loss_conf.data[0], loss_cls.data[0], loss.data[0]))
+        lossData = {"loss":loss.data[0],
+                    "nGT":nGT,
+                    "nCorrect":nCorrect,
+                    "nProposals":nProposals,
+                    "lossX":loss_x.data[0],
+                    "lossY":loss_y.data[0],
+                    "lossW":loss_w.data[0],
+                    "lossH":loss_h.data[0],
+                    "lossConf":loss_conf.data[0],
+                    "lossCls":loss_cls.data[0],
+                    "activationTime":t1-t0,
+                    "createPredBoxesTime":t2-t1,
+                    "buildTargetsTime":t3-t2,
+                    "lossTime":t4-t3,
+                    "loasTotalTime":t4-t0}
+
+        return loss,lossData
