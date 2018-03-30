@@ -103,6 +103,51 @@ def detect_skimage(cfgfile, weightfile, imgfile):
     plot_boxes_cv2(img, boxes, savename='predictions.jpg', class_names=class_names)
 
 
+def detect_cv2_video(cfgfile, weightfile, videofile):
+    import cv2
+    m = Darknet(cfgfile)
+
+    m.print_network()
+    m.load_weights(weightfile)
+    print('Loading weights from %s... Done!' % (weightfile))
+
+    if m.num_classes == 20:
+        namesfile = 'data/voc.names'
+    elif m.num_classes == 80:
+        namesfile = 'data/coco.names'
+    else:
+        namesfile = 'data/names'
+    
+    use_cuda = 1
+    if use_cuda:
+        m.cuda()
+
+    cap = cv2.VideoCapture(videofile)
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    writer = cv2.VideoWriter("videoOut.avi",fourcc,cap.get(5),(int(cap.get(3)),int(cap.get(4))))
+    
+    while cap.isOpened():
+        ret,img = cap.read()
+
+        if not ret:
+            print("Reached end of video file!")
+            break
+
+        sized = cv2.resize(img, (m.width, m.height))
+        sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
+        
+        for i in range(2):
+            start = time.time()
+            boxes = do_detect(m, sized, 0.5, 0.4, use_cuda)
+            finish = time.time()
+            if i == 1:
+                print('%s: Predicted in %f seconds.' % (imgfile, (finish-start)))
+
+        class_names = load_class_names(namesfile)
+        imgBoxes = plot_boxes_cv2(img, boxes, class_names=class_names)
+        writer.write(imgBoxes)
+    cap.release()
+    writer.release()
 
 
 if __name__ == '__main__':
@@ -110,9 +155,13 @@ if __name__ == '__main__':
         cfgfile = sys.argv[1]
         weightfile = sys.argv[2]
         imgfile = sys.argv[3]
-        detect(cfgfile, weightfile, imgfile)
-        #detect_cv2(cfgfile, weightfile, imgfile)
-        #detect_skimage(cfgfile, weightfile, imgfile)
+
+        if imgfile[imgfile.rfind(".")+1:] == "avi":
+            detect_cv2_video(cfgfile, weightfile, imgfile)
+        else:
+            #detect(cfgfile, weightfile, imgfile)
+            detect_cv2(cfgfile, weightfile, imgfile)
+            #detect_skimage(cfgfile, weightfile, imgfile)
     else:
         print('Usage: ')
         print('  python detect.py cfgfile weightfile imgfile')
