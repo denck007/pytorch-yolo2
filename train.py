@@ -59,7 +59,7 @@ max_epochs    = int(max_batches*batch_size/nsamples+1)
 use_cuda      = True
 seed          = int(time.time())
 eps           = 1e-5
-save_interval = 10  # epoches
+save_interval = 2  # epoches
 dot_interval  = 70  # batches
 
 trainHistoryFname = "historyTrain.csv"
@@ -299,6 +299,11 @@ else:
     print("init_epoch: {} max_epochs: {}".format(init_epoch,max_epochs))
     for epoch in range(init_epoch, max_epochs): 
 
-        #train(epoch)
+        train(epoch)
         print("Finished training on epoch {}".format(epoch))
         test(epoch)
+        
+        # save the last weights
+        logging('save weights to %s/%06d.weights' % (backupdir, epoch+1))
+        cur_model.seen = (epoch + 1) * len(train_loader.dataset)
+        cur_model.save_weights('%s/%06d.weights' % (backupdir, epoch+1))
