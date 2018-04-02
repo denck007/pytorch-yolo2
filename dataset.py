@@ -54,10 +54,20 @@ class listDataset(Dataset):
     def __len__(self):
         return self.nSamples
 
+    def _getImgPathLabelPath(self,index):
+        
+        try:
+            imgpath = self.lines[index].rstrip()
+            labelpath = self.labelfiles[self.imgIdxToLabelIdx[index]]
+            return  [imgpath,labelpath]
+        except:
+            print("Error trying to read imgIdxToLabelIdx: {}".format(self.imgIdxToLabelIdx[index]))
+            print("Image file involved is {}".format(self.lines))
+            return self._getImgPathLabelPath(index+1) # if it is bad, just keep going till a good one is found
+
     def __getitem__(self, index):
         assert index <= len(self), 'index range error'
-        imgpath = self.lines[index].rstrip()
-        labelpath = self.labelfiles[self.imgIdxToLabelIdx[index]]
+        imgpath,labelpath = _getImgPathLabelPath(index)
 
         if self.train and index % 64== 0:
             if self.seen < 4000*64:
