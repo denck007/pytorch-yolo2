@@ -1,0 +1,8 @@
+train  = /dataset/convert-to-VOC/KITTI_Labels/imageList.txt
+valid  = /dataset/convert-to-VOC/KITTI_Labels/imageList.txt
+trainLabelFolder = /dataset/convert-to-VOC/KITTI_Labels/DarknetFormat
+testLabelFolder = /dataset/convert-to-VOC/KITTI_Labels/DarknetFormat
+names = data/KITTI_small.names
+backup = backup
+gpus  = 0
+num_workers = 8
