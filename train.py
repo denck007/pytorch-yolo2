@@ -100,7 +100,7 @@ test_loader = torch.utils.data.DataLoader(
                    shuffle=False,
                    transform=transforms.Compose([
                        transforms.ToTensor(),
-                   ]), train=False),
+                   ]), train=True), # does not work if set to False
     batch_size=batch_size, shuffle=False, **kwargs)
 
 if use_cuda:
@@ -208,7 +208,8 @@ def test(epoch):
     toShow = ["loss","precision","recall","fscore"]
     testHistory = history(testHistoryFname,avgOver=0,saveEvery=-1,toShow=toShow)
 
-    model.eval()
+    #model.eval() # does not work in eval mode
+    model.train()
     if ngpus > 1:
         cur_model = model.module
     else:
@@ -228,7 +229,8 @@ def test(epoch):
 
         if use_cuda:
             data = data.cuda()
-        data = Variable(data, volatile=True)
+        data = Variable(data)#, volatile=True)
+        
         output = model(data)
         _, lossData = region_loss(output, Variable(target)) # don't need the loss values for anything, just the misc data
         optimizer.zero_grad() #remove the gradient from the optimizer
@@ -297,6 +299,6 @@ else:
     print("init_epoch: {} max_epochs: {}".format(init_epoch,max_epochs))
     for epoch in range(init_epoch, max_epochs): 
 
-        train(epoch)
+        #train(epoch)
         print("Finished training on epoch {}".format(epoch))
         test(epoch)
