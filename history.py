@@ -129,7 +129,7 @@ class history(object):
         outData = self.ds[self.names[0]][:endOffset,:2].reshape(-1,2)
         for key in self.ds.keys():
             outString += ",{}".format(key)
-            print("outData.shape: {}\tself.ds[key][:endOffset,2].reshape(-1,1).shape: {}".format(outData.shape,self.ds[key][:endOffset,2].reshape(-1,1).shape))
+            #print("outData.shape: {}\tself.ds[key][:endOffset,2].reshape(-1,1).shape: {}".format(outData.shape,self.ds[key][:endOffset,2].reshape(-1,1).shape))
             outData = np.concatenate((outData,self.ds[key][:endOffset,2].reshape(-1,1)),axis=1)
         
         if not writeHeaders: # clear out header if it is not to be included
