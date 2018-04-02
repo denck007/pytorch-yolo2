@@ -48,7 +48,10 @@ def detect_cv2(cfgfile, weightfile, imgfile):
         namesfile = 'data/voc.names'
     elif m.num_classes == 80:
         namesfile = 'data/coco.names'
+    elif m.num_classes == 3:
+        namesfile = 'data/KITTI_small.names'
     else:
+        print("m.num_classes == {}".format(m.num_classes))
         namesfile = 'data/names'
     
     use_cuda = 1
@@ -67,7 +70,7 @@ def detect_cv2(cfgfile, weightfile, imgfile):
             print('%s: Predicted in %f seconds.' % (imgfile, (finish-start)))
 
     class_names = load_class_names(namesfile)
-    plot_boxes_cv2(img, boxes, savename='predictions.jpg', class_names=class_names)
+    plot_boxes_cv2(img, boxes, savename=imgfile+'_predictions.jpg', class_names=class_names)
 
 def detect_skimage(cfgfile, weightfile, imgfile):
     from skimage import io
@@ -82,8 +85,11 @@ def detect_skimage(cfgfile, weightfile, imgfile):
         namesfile = 'data/voc.names'
     elif m.num_classes == 80:
         namesfile = 'data/coco.names'
+    elif m.num_classes == 3:
+        namesfile = 'data/KITTI_small.names'
     else:
-        namesfile = 'data/names'
+        print("m.num_classes == {}".format(m.num_classes))
+        namesfile = 'data/KITTI_small.names'
     
     use_cuda = 1
     if use_cuda:
