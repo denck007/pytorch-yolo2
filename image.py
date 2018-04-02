@@ -115,11 +115,11 @@ def fill_truth_detection(labpath, w, h, flip, dx, dy, sx, sy):
     label = np.reshape(label, (-1))
     return label
 
-def load_data_detection(imgpath, shape, jitter, hue, saturation, exposure):
-    labpath = imgpath.replace('images', 'labels').replace('JPEGImages', 'labels').replace('.jpg', '.txt').replace('.png','.txt')
+def load_data_detection(imgpath, labelpath, shape, jitter, hue, saturation, exposure):
+    #labpath = imgpath.replace('images', 'labels').replace('JPEGImages', 'labels').replace('.jpg', '.txt').replace('.png','.txt')
 
     ## data augmentation
     img = Image.open(imgpath).convert('RGB')
     img,flip,dx,dy,sx,sy = data_augmentation(img, shape, jitter, hue, saturation, exposure)
-    label = fill_truth_detection(labpath, img.width, img.height, flip, dx, dy, 1./sx, 1./sy)
+    label = fill_truth_detection(labelpath, img.width, img.height, flip, dx, dy, 1./sx, 1./sy)
     return img,label

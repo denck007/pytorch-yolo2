@@ -27,6 +27,8 @@ net_options   = parse_cfg(cfgfile)[0]
 
 trainlist     = data_options['train']
 testlist      = data_options['valid']
+trainLabelFolder = data_options['trainLabelFolder']
+testLabelFolder = data_options['testLabelFolder']
 gpus          = data_options['gpus']  # e.g. 0,1,2,3
 num_workers   = int(data_options['num_workers'])
 
@@ -56,7 +58,7 @@ init_height       = model.height
 
 kwargs = {'num_workers': num_workers, 'pin_memory': True} if use_cuda else {}
 test_loader = torch.utils.data.DataLoader(
-    dataset.listDataset(testlist, shape=(init_width, init_height),
+    dataset.listDataset(testlist, testLabelFolder, shape=(init_width, init_height),
                    shuffle=False,
                    transform=transforms.Compose([
                        transforms.ToTensor(),

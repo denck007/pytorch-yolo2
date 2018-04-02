@@ -37,6 +37,8 @@ net_options   = parse_cfg(cfgfile)[0]
 
 trainlist     = data_options['train']
 testlist      = data_options['valid']
+trainLabelFolder = data_options['trainLabelFolder']
+testLabelFolder = data_options['testLabelFolder']
 backupdir     = data_options['backup']
 nsamples      = file_lines(trainlist)
 gpus          = data_options['gpus']  # e.g. 0,1,2,3
@@ -94,7 +96,7 @@ init_epoch        = int(model.seen/nsamples )
 
 kwargs = {'num_workers': num_workers, 'pin_memory': True} if use_cuda else {}
 test_loader = torch.utils.data.DataLoader(
-    dataset.listDataset(testlist, shape=(init_width, init_height),
+    dataset.listDataset(testlist, testLabelFolder, shape=(init_width, init_height),
                    shuffle=False,
                    transform=transforms.Compose([
                        transforms.ToTensor(),
@@ -142,7 +144,7 @@ def train(epoch):
     else:
         cur_model = model
     train_loader = torch.utils.data.DataLoader(
-        dataset.listDataset(trainlist, shape=(init_width, init_height),
+        dataset.listDataset(trainlist, trainLabelFolder, shape=(init_width, init_height),
                        shuffle=True,
                        transform=transforms.Compose([
                            transforms.ToTensor(),

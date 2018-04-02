@@ -23,7 +23,7 @@ def valid(datacfg, cfgfile, weightfile, outfile):
     m.cuda()
     m.eval()
 
-    valid_dataset = dataset.listDataset(valid_images, shape=(m.width, m.height),
+    valid_dataset = dataset.listDataset(valid_images, None, shape=(m.width, m.height),
                        shuffle=False,
                        transform=transforms.Compose([
                            transforms.ToTensor(),

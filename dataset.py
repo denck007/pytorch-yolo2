@@ -12,21 +12,34 @@ from image import *
 
 class listDataset(Dataset):
 
-    def __init__(self, root, shape=None, shuffle=True, transform=None, target_transform=None, train=False, seen=0, batch_size=64, num_workers=4):
-       with open(root, 'r') as file:
+    def __init__(self, imagelist, labelFolder, shape=None, shuffle=True, transform=None, target_transform=None, train=False, seen=0, batch_size=64, num_workers=4):
+        with open(imagelist, 'r') as file:
            self.lines = file.readlines()
 
-       if shuffle:
+        if shuffle:
            random.shuffle(self.lines)
 
-       self.nSamples  = len(self.lines)
-       self.transform = transform
-       self.target_transform = target_transform
-       self.train = train
-       self.shape = shape
-       self.seen = seen
-       self.batch_size = batch_size
-       self.num_workers = num_workers
+        # find the index of the label file for each of the images
+        if labelFolder is not None:
+            self.labelfiles = os.listdir(labelFolder)
+            imgs = [self.lines[ii][self.lines[ii].rfind("/")+1:] for ii in range(len(self.lines))]
+            imgs = [imgs[ii][:imgs[ii].rfind(".")] for ii in range(len(imgs))]
+            labels = [label[:label.rfind(".")] for label in os.listdir(labelFolder)]
+            imageIdxs = list(range(len(imgs)))
+            labelIdxs = []
+            for ii in imageIdxs:
+                labelIdxs.append(labels.index(imgs[ii]))
+            self.imgIdxToLabelIdx = dict(zip(imageIdxs,labelIdxs))
+            self.labelfiles = [os.path.join(labelFolder,lab) for lab in self.labelfiles]
+
+        self.nSamples  = len(self.lines)
+        self.transform = transform
+        self.target_transform = target_transform
+        self.train = train
+        self.shape = shape
+        self.seen = seen
+        self.batch_size = batch_size
+        self.num_workers = num_workers
 
     def __len__(self):
         return self.nSamples
@@ -34,6 +47,7 @@ class listDataset(Dataset):
     def __getitem__(self, index):
         assert index <= len(self), 'index range error'
         imgpath = self.lines[index].rstrip()
+        labelpath = self.labelfiles[self.imgIdxToLabelIdx[index]]
 
         if self.train and index % 64== 0:
             if self.seen < 4000*64:
@@ -58,7 +72,7 @@ class listDataset(Dataset):
             saturation = 1.5 
             exposure = 1.5
 
-            img, label = load_data_detection(imgpath, self.shape, jitter, hue, saturation, exposure)
+            img, label = load_data_detection(imgpath, labelpath, self.shape, jitter, hue, saturation, exposure)
             label = torch.from_numpy(label)
         else:
             img = Image.open(imgpath).convert('RGB')
