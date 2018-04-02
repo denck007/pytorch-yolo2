@@ -18,17 +18,27 @@ class listDataset(Dataset):
 
         if shuffle:
            random.shuffle(self.lines)
-
+        #print("found {} images".format(len(self.lines)))
         # find the index of the label file for each of the images
         if labelFolder is not None:
             self.labelfiles = os.listdir(labelFolder)
+            #print("found {} labels".format(len(self.labelfiles)))
             imgs = [self.lines[ii][self.lines[ii].rfind("/")+1:] for ii in range(len(self.lines))]
             imgs = [imgs[ii][:imgs[ii].rfind(".")] for ii in range(len(imgs))]
             labels = [label[:label.rfind(".")] for label in os.listdir(labelFolder)]
-            imageIdxs = list(range(len(imgs)))
+            imageIdxs = []
             labelIdxs = []
-            for ii in imageIdxs:
-                labelIdxs.append(labels.index(imgs[ii]))
+            imagesWithNoLabel = []
+            for ii in range(len(imgs)):
+                try:
+                    imageIdxs.append(ii)
+                    labelIdxs.append(labels.index(imgs[ii]))
+                except:
+                    imagesWithNoLabel.append(ii)
+            if len(imagesWithNoLabel) > 0:
+                print("Found {} images with no label file".format(len(imagesWithNoLabel)))
+                #for l in imagesWithNoLabel:
+                #    print("\t" + imgs[l])                
             self.imgIdxToLabelIdx = dict(zip(imageIdxs,labelIdxs))
             self.labelfiles = [os.path.join(labelFolder,lab) for lab in self.labelfiles]
 
