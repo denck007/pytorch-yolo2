@@ -31,8 +31,8 @@ class listDataset(Dataset):
             imagesWithNoLabel = []
             for ii in range(len(imgs)):
                 try:
-                    imageIdxs.append(ii)
                     labelIdxs.append(labels.index(imgs[ii]))
+                    imageIdxs.append(ii) # do this last incase labels.index(imgs[ii]) fails
                 except:
                     imagesWithNoLabel.append(ii)
             if len(imagesWithNoLabel) > 0:
@@ -42,7 +42,7 @@ class listDataset(Dataset):
             self.imgIdxToLabelIdx = dict(zip(imageIdxs,labelIdxs))
             self.labelfiles = [os.path.join(labelFolder,lab) for lab in self.labelfiles]
 
-        self.nSamples  = len(self.lines)
+        self.nSamples  = len(imageIdxs) # must be imageIdx so we don't count images with no labels
         self.transform = transform
         self.target_transform = target_transform
         self.train = train
@@ -61,13 +61,12 @@ class listDataset(Dataset):
             labelpath = self.labelfiles[self.imgIdxToLabelIdx[index]]
             return  [imgpath,labelpath]
         except:
-            print("Error trying to read imgIdxToLabelIdx: {}".format(self.imgIdxToLabelIdx[index]))
-            print("Image file involved is {}".format(self.lines))
-            return self._getImgPathLabelPath(index+1) # if it is bad, just keep going till a good one is found
+            #print("Image file involved is {}, index involved is {}".format(self.lines,index))
+            return self._getImgPathLabelPath(index-1) # if it is bad, just keep going till a good one is found
 
     def __getitem__(self, index):
         assert index <= len(self), 'index range error'
-        imgpath,labelpath = _getImgPathLabelPath(index)
+        imgpath,labelpath = self._getImgPathLabelPath(index)
 
         if self.train and index % 64== 0:
             if self.seen < 4000*64:
@@ -124,3 +123,5 @@ class listDataset(Dataset):
 
         self.seen = self.seen + self.num_workers
         return (img, label)
+
+
