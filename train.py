@@ -101,7 +101,7 @@ test_loader = torch.utils.data.DataLoader(
                    transform=transforms.Compose([
                        transforms.ToTensor(),
                    ]), train=True), # does not work if set to False
-    batch_size=batch_size, shuffle=False, **kwargs)
+    batch_size=batch_size, shuffle=False, drop_last=True,**kwargs)
 
 if use_cuda:
     if ngpus > 1:
@@ -153,7 +153,7 @@ def train(epoch):
                        seen=cur_model.seen,
                        batch_size=batch_size,
                        num_workers=num_workers),
-        batch_size=batch_size, shuffle=False, **kwargs)
+        batch_size=batch_size, shuffle=False,drop_last=True, **kwargs)
 
     lr = adjust_learning_rate(optimizer, processed_batches)
     logging('epoch %d, processed %d samples, lr %f' % (epoch, epoch * len(train_loader.dataset), lr))
@@ -303,7 +303,7 @@ else:
         print("Finished training on epoch {}".format(epoch))
         test(epoch)
         
-        # save the last weights
-        logging('save weights to %s/%06d.weights' % (backupdir, epoch+1))
-        cur_model.seen = (epoch + 1) * len(train_loader.dataset)
-        cur_model.save_weights('%s/%06d.weights' % (backupdir, epoch+1))
+    # save the last weights
+    logging('save weights to %s/%06d.weights' % (backupdir, epoch+1))
+    cur_model.seen = (epoch + 1) * len(train_loader.dataset)
+    cur_model.save_weights('%s/%06d.weights' % (backupdir, epoch+1))
