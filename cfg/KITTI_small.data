@@ -1,7 +1,7 @@
-train  = /dataset/convert-to-VOC/KITTI_Labels/imageList.txt
-valid  = /dataset/convert-to-VOC/KITTI_Labels/imageList.txt
-trainLabelFolder = /dataset/convert-to-VOC/KITTI_Labels/DarknetFormat
-testLabelFolder = /dataset/convert-to-VOC/KITTI_Labels/DarknetFormat
+train  = /dataset/convert-to-VOC/combinedDataset/trainImages
+valid  = /dataset/convert-to-VOC/combinedDataset/trainImages
+trainLabelFolder = /dataset/convert-to-VOC/combinedDataset/DarknetFormat
+testLabelFolder = /dataset/convert-to-VOC/combinedDataset/DarknetFormat
 names = data/KITTI_small.names
 backup = backup
 gpus  = 0
